@@ -1,0 +1,118 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<stdbool.h>
+
+struct client
+{
+	char nom[20]; // nom et prénom du client
+	float ch_aff; // chiffre d’affaire du client
+};
+
+struct cellule
+{
+	struct client elem;
+	struct cellule* suiv; // pointeur sur la cellule suivante
+};
+
+typedef struct cellule* liste; // type d’une liste simplement chaînée de clients.
+
+struct noeud
+{
+	struct noeud* gauche;
+	struct client elem;
+	struct noeud* droite;
+};
+
+typedef struct noeud* arbre; // type d’un arbre binaire de recherche de clients.
+
+void init_liste(liste* l)
+{
+	*l = NULL;
+}
+
+void inserer_liste(liste* l)
+{
+	struct client c;
+	liste nouv;
+	nouv = (liste)malloc(sizeof(struct cellule));
+	printf("Entrer votre identite (nom et prenom): ");
+	scanf("%s", c.nom);
+	printf("Entrer le chiffre d'affaires du client: ");
+	scanf("%f", &c.ch_aff);
+	nouv->elem = c;
+	nouv->suiv = *l;
+	*l = nouv;
+}
+
+void creer_liste(liste* l)
+{
+	char rep;
+	do {
+		printf("Voulez-vous continuer ? (o/n): ");
+		scanf(" %c", &rep);
+		if (rep == 'o') {
+			inserer_liste(l);
+		}
+	} while (rep == 'o');
+}
+
+void init_arbre(arbre* a)
+{
+	*a = NULL;
+}
+
+bool vide(arbre a)
+{
+	return a == NULL;
+}
+
+void inserer_arbre_rec(arbre* a, struct client c)
+{
+	if (vide(*a)) {
+		 *a = (arbre)malloc(sizeof(struct noeud));
+		 (*a)->elem = c;
+		 (*a)->gauche = NULL;
+		 (*a)->droite = NULL;
+	}
+	else {
+		if (c.ch_aff < (*a)->elem.ch_aff) {
+			inserer_arbre_rec(&(*a)->gauche, c);
+		}
+		else {
+			inserer_arbre_rec(&(*a)->droite, c);
+		}
+	}
+}
+
+void creer_arbre(arbre* a, liste l)
+{
+	liste p;
+	while (l != NULL) {
+		p = l;
+		inserer_arbre_rec(a, p->elem);
+		l = l->suiv;
+		free(p);
+	}
+}
+
+void afficher(arbre a)
+{
+	if (a != NULL) {
+		afficher(a->droite);
+		printf("Nom: %s\n", a->elem.nom);
+		printf("Chiffre d'affaires: %.2f\n", a->elem.ch_aff);
+		afficher(a->gauche);
+	}
+}
+
+int main()
+{
+	liste l;
+	arbre a; // a est un pointeur sur un arbre binaire de recherche
+	init_liste(&l);
+	creer_liste(&l);
+	init_arbre(&a);
+	creer_arbre(&a, l);
+	afficher(a);
+	return 0;
+}
