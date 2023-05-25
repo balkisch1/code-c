@@ -1,0 +1,83 @@
+
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+
+struct article {
+	char nom[20];
+	float prix;
+	int qte;
+};
+
+struct noeud {
+	struct article elem;
+	struct noeud* gauche;
+	struct noeud* droit;
+};
+
+typedef struct noeud* arbre;
+
+void ajouter_article(arbre* r, struct article a) {
+	if (*r == NULL) {
+		*r = (arbre)malloc(sizeof(struct noeud));
+		(*r)->gauche = NULL;
+		(*r)->droit = NULL;
+		(*r)->elem = a;
+	} else {
+		if (a.prix > (*r)->elem.prix) {
+			ajouter_article(&(*r)->droit, a);
+		} else {
+			ajouter_article(&(*r)->gauche, a);
+		}
+	}
+}
+
+void remplir_arbre(arbre* r, int n) {
+	struct article a;
+	int i;
+	for (i = 0; i < n; i++) {
+		printf("Entrer le nom de l'article: ");
+		scanf("%s", a.nom);
+		printf("Entrer le prix de l'article: ");
+		scanf("%f", &a.prix);
+		printf("Entrer la quantite de l'article: ");
+		scanf("%d", &a.qte);
+		ajouter_article(r, a);
+	}
+}
+
+void afficher_stock(arbre r) {
+	if (r != NULL) {
+		afficher_stock(r->droit);
+		printf("Nom de l'article: %s\n", r->elem.nom);
+		printf("Prix de l'article: %.2f\n", r->elem.prix);
+		printf("Quantite de l'article: %d\n", r->elem.qte);
+		afficher_stock(r->gauche);
+	}
+}
+
+int stock_faible(arbre r, int seuil) {
+	if (r != NULL) {
+		int count = 0;
+		if (r->elem.qte < seuil) {
+			count = 1;
+		}
+		return count + stock_faible(r->droit, seuil) + stock_faible(r->gauche, seuil);
+	}
+	return 0;
+}
+
+int main() {
+	arbre r = NULL;
+	int n;
+	int seuil;
+	printf("Entrer le nombre de noeuds: ");
+	scanf("%d", &n);
+	remplir_arbre(&r, n);
+	afficher_stock(r);
+	printf("Entrer le seuil minimal: ");
+	scanf("%d", &seuil);
+	int nbr = stock_faible(r, seuil);
+	printf("Le nombre de produits dont les quantites en stock sont inferieures au seuil est: %d\n", nbr);
+	return 0;
+}
